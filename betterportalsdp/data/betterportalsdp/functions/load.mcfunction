@@ -1,0 +1,10 @@
+scoreboard objectives add tpZ dummy
+scoreboard objectives add tpY dummy
+scoreboard objectives add tpX dummy
+scoreboard objectives add dZ dummy
+scoreboard objectives add dY dummy
+scoreboard objectives add dX dummy
+scoreboard objectives add locZ dummy
+scoreboard objectives add locY dummy
+scoreboard objectives add locX dummy
+tellraw @p [{"text":"Successfullly loaded BetterPortalsDP","color":"green"}]

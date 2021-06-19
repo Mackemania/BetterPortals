@@ -1,1 +1,4 @@
-
+.packages
+.dart_tool
+.vscode
+*.lock
