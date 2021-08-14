@@ -1,5 +1,6 @@
 import 'package:objd/core.dart';
 
+int range = 64;
 void main(List<String> args) {
   createProject(
     Project(
@@ -53,7 +54,16 @@ class MainWidget extends Widget {
     Group enterNether = Group(
       prefix: "execute as @a[tag=!Portal,nbt={Dimension:'minecraft:the_nether'}] run",
       children: [
-        Log("Added Portal"),
+        Execute(
+          as: Entity(selector: "s",
+          tags: [
+            Tag("Debug")
+            ]
+          ),
+          children: [
+            Log("Added Portal")
+          ]
+        ),
         Command("/execute as @s store result score @s tpX run data get entity @s enteredNetherPosition.x"),
         Command("/execute as @s store result score @s tpY run data get entity @s enteredNetherPosition.y"),
         Command("/execute as @s store result score @s tpZ run data get entity @s enteredNetherPosition.z"),
@@ -64,51 +74,86 @@ class MainWidget extends Widget {
       ]
     );
 
-    int range = 64;
     Group exitNether = Group(
       prefix: "execute as @a[tag=Portal,nbt={Dimension:'minecraft:overworld'}] run",
-        children: [
-          Log("Removed Portal"),
-          Command("/execute as @s store result score @s locX run data get entity @s Pos[0]"),
-          Command("/execute as @s store result score @s locY run data get entity @s Pos[1]"),
-          Command("/execute as @s store result score @s locZ run data get entity @s Pos[2]"),
-          dX.setEqual(locX).subtractScore(tpX),
-          dY.setEqual(locY).subtractScore(tpY),
-          dZ.setEqual(locZ).subtractScore(tpZ),
-          Execute(
-            as: Entity(
-              selector: "s",
-              scores: [
-                Score(
-                  Entity(
-                    selector: "s"
-                  ),
-                  "dX"
-                ).matchesRange(Range(-range, range)),
-                Score(
-                  Entity(
-                    selector: "s"
-                  ),
-                  "dY"
-                ).matchesRange(Range(-range, range)),
-                Score(
-                  Entity(
-                    selector: "s"
-                  ),
-                  "dZ"
-                ).matchesRange(Range(-range, range))]
+      children: [
+        Execute(
+          as: Entity(selector: "s",
+          tags: [
+            Tag("Debug")
+            ]
+          ),
+          children: [
+            Log("Removed Portal")
+          ]
+        ),
+        Command("/execute as @s store result score @s locX run data get entity @s Pos[0]"),
+        Command("/execute as @s store result score @s locY run data get entity @s Pos[1]"),
+        Command("/execute as @s store result score @s locZ run data get entity @s Pos[2]"),
+        dX.setEqual(locX).subtractScore(tpX),
+        dY.setEqual(locY).subtractScore(tpY),
+        dZ.setEqual(locZ).subtractScore(tpZ),
+        Execute(
+          as: Entity(
+            selector: "s",
+            scores: [
+              Score(
+                Entity(
+                  selector: "s"
+                ),
+                "dX"
+              ).matchesRange(Range(-range, range)),
+              Score(
+                Entity(
+                  selector: "s"
+                ),
+                "dY"
+              ).matchesRange(Range(-range, range)),
+              Score(
+                Entity(
+                  selector: "s"
+                ),
+                "dZ"
+              ).matchesRange(Range(-range, range))
+            ],
+          ),
+          children: [
+            Command("/function scoretp:tp")
+          ]
+        ),
+        tpX.setEqual(locX),
+        tpY.setEqual(locY),
+        tpZ.setEqual(locZ),
+        If(
+          Condition.not(
+            Condition.or([
+              Condition.block(
+                Location.here(),
+                block: Blocks.nether_portal
               ),
-            children: [
-              Command("/function scoretp:tp")
+              Condition.block(
+                Location.here(),
+                block: Blocks.air
+              )
+            ])
+          ),
+          then: [
+            Execute(
+              as: Entity(
+                selector: "s"
+              ),
+              children: [
+                Command("/function scoretp:tp")
               ]
-            ),
-          Tag(
-            "Portal",
-            entity: Entity(selector: "s"),
-          ).removeIfExists()
-        ]
-      );
-
+            )
+          ]
+        ),
+        Tag(
+          "Portal",
+          entity: Entity(selector: "s"),
+        ).removeIfExists()
+      ]
+    );
     Group full = Group(children: [setupScoreboard, enterNether, exitNether]);
     return full;
   }
